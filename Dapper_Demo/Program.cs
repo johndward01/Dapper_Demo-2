@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using MySql.Data.MySqlClient;
+using System;
+using System.Data;
+using System.IO;
 
 namespace Dapper_Demo
 {
@@ -6,7 +10,23 @@ namespace Dapper_Demo
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            string connString = config.GetConnectionString("DefaultConnection");
+            IDbConnection conn = new MySqlConnection(connString);
+
+            var departmentRepo = new DepartmentRepo(conn);
+
+            var departments = departmentRepo.GetAllDepartments();
+
+            foreach (var department in departments)
+            {
+                Console.WriteLine($"ID: {department.DepartmentID}");
+                Console.WriteLine($"Name: {department.Name}");
+            }
         }
     }
 }
